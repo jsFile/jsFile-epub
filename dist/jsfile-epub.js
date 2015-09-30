@@ -81,8 +81,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @type {{extension: Array, mime: Array}}
 	 */
 	var files = {
-	    extension: [],
-	    mime: []
+	    extension: ['epub'],
+	    mime: ['application/epub+zip']
 	};
 
 	var EpubEngine = (function (_Engine) {
@@ -94,6 +94,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _get(Object.getPrototypeOf(EpubEngine.prototype), 'constructor', this).apply(this, arguments);
 
 	        this.createDocument = _readerCreateDocument2['default'];
+	        this.parser = 'readArchive';
 	        this.files = files;
 	    }
 
@@ -129,7 +130,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	Object.defineProperty(exports, '__esModule', {
-	  value: true
+	    value: true
 	});
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -138,10 +139,284 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _JsFile2 = _interopRequireDefault(_JsFile);
 
-	exports['default'] = function (data) {};
+	var _parsePackageInfo = __webpack_require__(3);
+
+	var _parsePackageInfo2 = _interopRequireDefault(_parsePackageInfo);
+
+	var _parseStyles = __webpack_require__(7);
+
+	var _parseStyles2 = _interopRequireDefault(_parseStyles);
+
+	var Document = _JsFile2['default'].Document;
+	var normalizeDataUri = _JsFile2['default'].Engine.normalizeDataUri;
+
+	exports['default'] = function (entries) {
+	    return new Promise((function (resolve, reject) {
+	        var queue = [];
+	        var fileName = this.fileName;
+
+	        var documentData = {
+	            media: {}
+	        };
+	        var pages = {};
+	        var domParser = new DOMParser();
+
+	        entries.forEach(function (fileEntry) {
+	            if (!fileEntry.file) {
+	                return;
+	            }
+
+	            var method = undefined;
+	            var filename = fileEntry.entry.filename;
+	            var isImage = Boolean(filename && filename.indexOf('/images/') >= 0);
+	            var isFont = Boolean(!isImage && filename && filename.indexOf('/fonts/') >= 0);
+	            var isMediaResource = isFont || isImage;
+	            if (isMediaResource) {
+	                method = 'readAsDataURL';
+	            }
+
+	            queue.push(this.readFileEntry({
+	                file: fileEntry.file,
+	                method: method
+	            }).then(function (result) {
+	                var path = filename.replace(/\/?[^\/]+\//, '');
+
+	                if (isMediaResource) {
+	                    documentData.media[path] = {
+	                        data: normalizeDataUri(result, filename)
+	                    };
+	                } else if (filename.indexOf('package.opf') >= 0) {
+	                    (0, _parsePackageInfo2['default'])(documentData, domParser.parseFromString(result, 'application/xml'));
+	                } else if (filename.indexOf('.xhtml') >= 0) {
+	                    pages[path] = domParser.parseFromString(result, 'application/xml');
+	                } else if (filename.indexOf('css/') >= 0) {
+	                    documentData.styles = (0, _parseStyles2['default'])(result);
+	                }
+	            }));
+	        }, this);
+
+	        Promise.all(queue).then(function () {
+	            resolve(new Document({
+	                name: fileName,
+	                content: [],
+	                styles: documentData.styles || []
+	            }));
+	        }, reject);
+	    }).bind(this));
+	};
 
 	;
 	module.exports = exports['default'];
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _parsePackageMetaData = __webpack_require__(4);
+
+	var _parsePackageMetaData2 = _interopRequireDefault(_parsePackageMetaData);
+
+	var _parsePackageManifest = __webpack_require__(5);
+
+	var _parsePackageManifest2 = _interopRequireDefault(_parsePackageManifest);
+
+	var _parsePackageSpine = __webpack_require__(6);
+
+	var _parsePackageSpine2 = _interopRequireDefault(_parsePackageSpine);
+
+	exports['default'] = function (documentData, xml) {
+	    [].forEach.call(xml && xml.childNodes && xml.childNodes[0] && xml.childNodes[0].childNodes || [], function (node) {
+	        switch (node.localName) {
+	            case 'metadata':
+	                documentData.documentInfo = (0, _parsePackageMetaData2['default'])(node);
+	                break;
+	            case 'manifest':
+	                documentData.manifest = (0, _parsePackageManifest2['default'])(node);
+	                break;
+	            case 'spine':
+	                documentData.spine = (0, _parsePackageSpine2['default'])(node);
+	                break;
+	        }
+	    });
+
+	    return documentData;
+	};
+
+	module.exports = exports['default'];
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+	var _bind = Function.prototype.bind;
+
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } }
+
+	exports['default'] = function (node) {
+	    var dest = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	    [].forEach.call(node && node.childNodes || [], function (node) {
+	        var localName = node.localName;
+	        var _node$textContent = node.textContent;
+	        var textContent = _node$textContent === undefined ? '' : _node$textContent;
+
+	        if (localName === 'date') {
+	            var date = textContent.split('-');
+	            date[1] = (date[1] || 1) - 1; //month
+	            dest[localName] = new (_bind.apply(Date, [null].concat(_toConsumableArray(date))))();
+	        } else if (localName === 'identifier') {
+	            dest.id = textContent;
+	        } else if (localName) {
+	            dest[localName] = textContent;
+	        }
+	    });
+
+	    return dest;
+	};
+
+	module.exports = exports['default'];
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _JsFile = __webpack_require__(1);
+
+	var _JsFile2 = _interopRequireDefault(_JsFile);
+
+	var formatPropertyName = _JsFile2['default'].Engine.formatPropertyName;
+
+	exports['default'] = function (node) {
+	    var dest = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	    var forEach = [].forEach;
+
+	    forEach.call(node && node.childNodes || [], function (node) {
+	        var _node$attributes = node.attributes;
+	        var attributes = _node$attributes === undefined ? {} : _node$attributes;
+
+	        var id = attributes.id && attributes.id.value;
+
+	        if (id) {
+	            dest[id] = {};
+
+	            forEach.call(attributes, function (_ref) {
+	                var name = _ref.name;
+	                var value = _ref.value;
+
+	                if (name !== 'id') {
+	                    dest[id][formatPropertyName(name)] = value;
+	                }
+	            });
+	        }
+	    });
+
+	    return dest;
+	};
+
+	module.exports = exports['default'];
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _JsFile = __webpack_require__(1);
+
+	var _JsFile2 = _interopRequireDefault(_JsFile);
+
+	var _JsFile$Engine = _JsFile2['default'].Engine;
+	var formatPropertyName = _JsFile$Engine.formatPropertyName;
+	var attributeToBoolean = _JsFile$Engine.attributeToBoolean;
+
+	exports['default'] = function (node) {
+	    var dest = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	    dest.items = [];
+	    dest.indices = {};
+	    var forEach = [].forEach;
+
+	    forEach.call(node && node.childNodes || [], function (node) {
+	        var _node$attributes = node.attributes;
+	        var attributes = _node$attributes === undefined ? {} : _node$attributes;
+
+	        var id = attributes.idref && attributes.idref.value;
+
+	        if (id) {
+	            (function () {
+	                var item = {
+	                    id: id
+	                };
+
+	                forEach.call(attributes, function (_ref) {
+	                    var name = _ref.name;
+	                    var value = _ref.value;
+
+	                    if (name !== 'idref') {
+	                        if (name === 'linear') {
+	                            item.linear = attributeToBoolean(value);
+	                        } else {
+	                            item[formatPropertyName(name)] = value;
+	                        }
+	                    }
+	                });
+
+	                //save index by id
+	                dest.indices[id] = dest.items.push(item) - 1;
+	            })();
+	        }
+	    });
+
+	    return dest;
+	};
+
+	module.exports = exports['default'];
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	exports["default"] = function (src) {
+	    var result = [];
+
+	    return result;
+	};
+
+	module.exports = exports["default"];
 
 /***/ }
 /******/ ])

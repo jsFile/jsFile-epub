@@ -6,12 +6,14 @@ import createDocument from './reader/createDocument';
  * @type {{extension: Array, mime: Array}}
  */
 const files = {
-    extension: [],
-    mime: []
+    extension: ['epub'],
+    mime: ['application/epub+zip']
 };
 
 class EpubEngine extends Engine {
     createDocument = createDocument
+
+    parser = 'readArchive'
 
     files = files
 
