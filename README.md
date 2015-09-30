@@ -1,0 +1,2 @@
+# jsFile-epub [![Build Status](https://secure.travis-ci.org/jsFile/jsFile-epub.png?branch=master)](https://travis-ci.org/jsFile/jsFile-epub)
+Engine for jsFile library for working with documents in EPUB format
