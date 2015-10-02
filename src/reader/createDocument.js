@@ -1,7 +1,8 @@
 import JsFile from 'JsFile';
 import parsePackageInfo from './parsePackageInfo';
 import parseStyles from './parseStyles';
-const {Document} = JsFile;
+import buildHtml from './buildHtml';
+import Document from './Document';
 const {normalizeDataUri} = JsFile.Engine;
 
 export default function (entries) {
@@ -9,6 +10,7 @@ export default function (entries) {
         const queue = [];
         const {fileName} = this;
         const documentData = {
+            styles: {},//TODO: remove and use parseStyles method
             media: {}
         };
         const pages = {};
@@ -43,17 +45,24 @@ export default function (entries) {
                 } else if (filename.indexOf('.xhtml') >= 0) {
                     pages[path] = domParser.parseFromString(result, 'application/xml');
                 } else if (filename.indexOf('css/') >= 0) {
-                    documentData.styles = parseStyles(result);
+                    documentData.styles[path] = result;
+
+                    //documentData.styles = parseStyles(result);
                 }
             }));
         }, this);
 
+        /**
+         * TODO: parse pages to JsFile structure and remove Epub HTML
+         */
         Promise.all(queue).then(() => {
-            resolve(new Document({
+            const doc = new Document({
                 name: fileName,
                 content: [],
-                styles: documentData.styles || []
-            }));
+                styles: []
+            });
+            doc._rawHtml = buildHtml(pages, documentData);
+            resolve(doc);
         }, reject);
     }.bind(this));
 };

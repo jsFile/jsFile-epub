@@ -1,6 +1,6 @@
 {
     "name": "jsfile-epub",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "jsFile-epub",
     "main": "dist/jsfile-epub.js",
     "scripts": {
