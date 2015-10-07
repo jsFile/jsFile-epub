@@ -29,23 +29,21 @@ describe('jsFile-epub', () => {
         let name;
         for (name in files) {
             if (files.hasOwnProperty(name)) {
-                (function (file, name) {
-                    const jf = new JsFile(file, {
-                        workerPath: '/base/dist/workers/'
-                    });
-                    const promise = jf.read().then(done, done);
-                    queue.push(promise);
+                const jf = new JsFile(files[name], {
+                    workerPath: '/base/dist/workers/'
+                });
+                const promise = jf.read().then(done, done);
+                queue.push(promise);
 
-                    function done (result) {
-                        assert.instanceOf(result, JsFile.Document, name);
-                        const json = result.json();
-                        const html = result.html();
-                        const text = html.textContent || '';
-                        assert.jsonSchema(json, documentSchema, name);
-                        assert.notEqual(text.length, 0, 'File ' + name + ' shouldn\'t be empty');
-                        assert.notEqual(result.name.length, 0, 'Engine should parse a name of file ' + name);
-                    }
-                }(files[name], name));
+                function done (result) {
+                    assert.instanceOf(result, JsFile.Document, name);
+                    const json = result.json();
+                    const html = result.html();
+                    const text = html.textContent || '';
+                    assert.jsonSchema(json, documentSchema, name);
+                    assert.notEqual(text.length, 0, 'File ' + name + ' shouldn\'t be empty');
+                    assert.notEqual(result.name.length, 0, 'Engine should parse a name of file ' + name);
+                }
             }
         }
 

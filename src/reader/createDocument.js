@@ -57,7 +57,9 @@ export default function (entries) {
          */
         Promise.all(queue).then(() => {
             const doc = new Document({
-                name: fileName,
+                meta: {
+                    name: fileName
+                },
                 content: [],
                 styles: []
             });

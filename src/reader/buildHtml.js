@@ -7,7 +7,7 @@ export default (pages, documentData) => {
     const result = document.createDocumentFragment();
     const {spine, manifest, media, styles} = documentData;
     const forEach = [].forEach;
-    let styleData = '';
+    const styleData = {};
 
     spine.items.forEach(({id}) => {
         const item = manifest[id];
@@ -23,11 +23,16 @@ export default (pages, documentData) => {
                     let style = path && styles[path];
 
                     if (style) {
-                        styleData += style.replace(/[\.\/]*(images|fonts)\/[^"]+/g, (path) => {
-                            path = path.replace(/^[\.\/]+/, '');
-                            const obj = media[path];
-                            return obj && obj.data || '';
-                        });
+                        if (!styleData[path]) {
+                            styleData[path] = {
+                                selectors: [`.${pageClassName}`],
+                                src: style.replace(/[\.\/]*(images|fonts)\/[^"]+/g, (path) => {
+                                    path = path.replace(/^[\.\/]+/, '');
+                                    const obj = media[path];
+                                    return obj && obj.data || '';
+                                })
+                            };
+                        }
                     }
                 });
 
@@ -43,9 +48,52 @@ export default (pages, documentData) => {
     });
 
     if (styleData) {
-        const tag = document.createElement('style');
-        tag.appendChild(document.createTextNode(styleData));
-        result.appendChild(tag);
+        let style = '';
+        let elMaxWidth = 0;
+
+        for (let p in styleData) {
+            if (styleData.hasOwnProperty(p)) {
+                const widthPattern = /width\s*\:\s*([0-9]+)px/g;
+                const obj = styleData[p];
+                let src = obj.src;
+                let widthData = widthPattern.exec(src);
+
+                while (widthData) {
+                    if (widthData[1] > elMaxWidth) {
+                        elMaxWidth = Number(widthData[1]);
+                    }
+
+                    widthData = widthPattern.exec(src);
+                }
+
+                src = src.replace(/\s*[^\{}\/]+\{/g, (input) => {
+                    input = input.trim();
+
+                    //@keyframes, @font-face, etc.
+                    if (input[0] === '@') {
+                        return input;
+                    }
+
+                    return input.split(/\s*,\s*/).map((selector) => {
+                        return obj.selectors.map((parent) => ` ${parent} ${selector}`).join(',');
+                    }).join(',');
+                });
+
+                style += `${src}\n`;
+            }
+        }
+
+        if (style) {
+            style += `\n.${pageClassName} {`;
+            if (elMaxWidth) {
+                style += `width:${elMaxWidth}px;`;
+            }
+
+            style += 'position:relative;}';
+            const el = document.createElement('style');
+            el.appendChild(document.createTextNode(style));
+            result.appendChild(el);
+        }
     }
 
     return result;

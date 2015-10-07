@@ -210,7 +210,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	         */
 	        Promise.all(queue).then(function () {
 	            var doc = new _Document2['default']({
-	                name: fileName,
+	                meta: {
+	                    name: fileName
+	                },
 	                content: [],
 	                styles: []
 	            });
@@ -459,7 +461,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var styles = documentData.styles;
 
 	    var forEach = [].forEach;
-	    var styleData = '';
+	    var styleData = {};
 
 	    spine.items.forEach(function (_ref) {
 	        var id = _ref.id;
@@ -484,11 +486,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    var style = path && styles[path];
 
 	                    if (style) {
-	                        styleData += style.replace(/[\.\/]*(images|fonts)\/[^"]+/g, function (path) {
-	                            path = path.replace(/^[\.\/]+/, '');
-	                            var obj = media[path];
-	                            return obj && obj.data || '';
-	                        });
+	                        if (!styleData[path]) {
+	                            styleData[path] = {
+	                                selectors: ['.' + pageClassName],
+	                                src: style.replace(/[\.\/]*(images|fonts)\/[^"]+/g, function (path) {
+	                                    path = path.replace(/^[\.\/]+/, '');
+	                                    var obj = media[path];
+	                                    return obj && obj.data || '';
+	                                })
+	                            };
+	                        }
 	                    }
 	                });
 
@@ -504,9 +511,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    if (styleData) {
-	        var tag = document.createElement('style');
-	        tag.appendChild(document.createTextNode(styleData));
-	        result.appendChild(tag);
+	        var style = '';
+	        var elMaxWidth = 0;
+
+	        for (var p in styleData) {
+	            if (styleData.hasOwnProperty(p)) {
+	                (function () {
+	                    var widthPattern = /width\s*\:\s*([0-9]+)px/g;
+	                    var obj = styleData[p];
+	                    var src = obj.src;
+	                    var widthData = widthPattern.exec(src);
+
+	                    while (widthData) {
+	                        if (widthData[1] > elMaxWidth) {
+	                            elMaxWidth = Number(widthData[1]);
+	                        }
+
+	                        widthData = widthPattern.exec(src);
+	                    }
+
+	                    src = src.replace(/\s*[^\{}\/]+\{/g, function (input) {
+	                        input = input.trim();
+
+	                        //@keyframes, @font-face, etc.
+	                        if (input[0] === '@') {
+	                            return input;
+	                        }
+
+	                        return input.split(/\s*,\s*/).map(function (selector) {
+	                            return obj.selectors.map(function (parent) {
+	                                return ' ' + parent + ' ' + selector;
+	                            }).join(',');
+	                        }).join(',');
+	                    });
+
+	                    style += src + '\n';
+	                })();
+	            }
+	        }
+
+	        if (style) {
+	            style += '\n.' + pageClassName + ' {';
+	            if (elMaxWidth) {
+	                style += 'width:' + elMaxWidth + 'px;';
+	            }
+
+	            style += 'position:relative;}';
+	            var el = document.createElement('style');
+	            el.appendChild(document.createTextNode(style));
+	            result.appendChild(el);
+	        }
 	    }
 
 	    return result;
