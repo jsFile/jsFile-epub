@@ -21,7 +21,7 @@ module.exports = function (config) {
         reporters: ['progress', 'coverage'],
 
         coverageReporter: {
-            type: 'html',
+            type: 'lcov',
             dir: 'tests/coverage/'
         },
 
@@ -42,10 +42,16 @@ module.exports = function (config) {
                         test: /(spec|src)/,
                         loader: 'babel',
                         query: {
-                            stage: 0
+                            stage: 0,
+                            auxiliaryCommentBefore: 'istanbul ignore next'
                         }
                     }
-                ]
+                ],
+                postLoaders: [{
+                    test: /\.js/,
+                    exclude: /(node_modules|bower_components|dist|tests)/,
+                    loader: 'istanbul-instrumenter'
+                }]
             }
         },
 

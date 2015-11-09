@@ -31,3 +31,4 @@ DS_Store
 npm-debug.log
 tests/filesCache.js
 dist/workers
+.coveralls.yml
