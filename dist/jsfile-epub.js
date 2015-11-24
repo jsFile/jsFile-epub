@@ -157,6 +157,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var normalizeDataUri = _JsFile2['default'].Engine.normalizeDataUri;
 
+	var contentFilePattern = /\.x?html$/i;
+	var filePathExcludePattern = /\/?[^\/]+\//;
+
 	exports['default'] = function (entries) {
 	    return new Promise((function (resolve, reject) {
 	        var queue = [];
@@ -187,15 +190,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	                file: fileEntry.file,
 	                method: method
 	            }).then(function (result) {
-	                var path = filename.replace(/\/?[^\/]+\//, '');
+	                var path = filename.replace(filePathExcludePattern, '');
 
 	                if (isMediaResource) {
 	                    documentData.media[path] = {
 	                        data: normalizeDataUri(result, filename)
 	                    };
-	                } else if (filename.indexOf('package.opf') >= 0) {
+	                } else if (filename.indexOf('.opf') >= 0) {
 	                    (0, _parsePackageInfo2['default'])(documentData, domParser.parseFromString(result, 'application/xml'));
-	                } else if (filename.indexOf('.xhtml') >= 0) {
+	                } else if (contentFilePattern.test(filename)) {
 	                    pages[path] = domParser.parseFromString(result, 'application/xml');
 	                } else if (filename.indexOf('css/') >= 0) {
 	                    documentData.styles[path] = result;
@@ -463,6 +466,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var forEach = [].forEach;
 	    var styleData = {};
 
+	    if (!spine || !spine.items) {
+	        return result;
+	    }
+
 	    spine.items.forEach(function (_ref) {
 	        var id = _ref.id;
 
@@ -510,57 +517,55 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    });
 
-	    if (styleData) {
-	        var style = '';
-	        var elMaxWidth = 0;
+	    var style = '';
+	    var elMaxWidth = 0;
 
-	        for (var p in styleData) {
-	            if (styleData.hasOwnProperty(p)) {
-	                (function () {
-	                    var widthPattern = /width\s*\:\s*([0-9]+)px/g;
-	                    var obj = styleData[p];
-	                    var src = obj.src;
-	                    var widthData = widthPattern.exec(src);
+	    for (var p in styleData) {
+	        if (styleData.hasOwnProperty(p)) {
+	            (function () {
+	                var widthPattern = /width\s*\:\s*([0-9]+)px/g;
+	                var obj = styleData[p];
+	                var src = obj.src;
+	                var widthData = widthPattern.exec(src);
 
-	                    while (widthData) {
-	                        if (widthData[1] > elMaxWidth) {
-	                            elMaxWidth = Number(widthData[1]);
-	                        }
-
-	                        widthData = widthPattern.exec(src);
+	                while (widthData) {
+	                    if (widthData[1] > elMaxWidth) {
+	                        elMaxWidth = Number(widthData[1]);
 	                    }
 
-	                    src = src.replace(/\s*[^\{}\/]+\{/g, function (input) {
-	                        input = input.trim();
+	                    widthData = widthPattern.exec(src);
+	                }
 
-	                        //@keyframes, @font-face, etc.
-	                        if (input[0] === '@') {
-	                            return input;
-	                        }
+	                src = src.replace(/\s*[^\{}\/]+\{/g, function (input) {
+	                    input = input.trim();
 
-	                        return input.split(/\s*,\s*/).map(function (selector) {
-	                            return obj.selectors.map(function (parent) {
-	                                return ' ' + parent + ' ' + selector;
-	                            }).join(',');
+	                    //@keyframes, @font-face, etc.
+	                    if (input[0] === '@') {
+	                        return input;
+	                    }
+
+	                    return input.split(/\s*,\s*/).map(function (selector) {
+	                        return obj.selectors.map(function (parent) {
+	                            return ' ' + parent + ' ' + selector;
 	                        }).join(',');
-	                    });
+	                    }).join(',');
+	                });
 
-	                    style += src + '\n';
-	                })();
-	            }
+	                style += src + '\n';
+	            })();
+	        }
+	    }
+
+	    if (style) {
+	        style += '\n.' + pageClassName + ' {';
+	        if (elMaxWidth) {
+	            style += 'width:' + elMaxWidth + 'px;';
 	        }
 
-	        if (style) {
-	            style += '\n.' + pageClassName + ' {';
-	            if (elMaxWidth) {
-	                style += 'width:' + elMaxWidth + 'px;';
-	            }
-
-	            style += 'position:relative;}';
-	            var el = document.createElement('style');
-	            el.appendChild(document.createTextNode(style));
-	            result.appendChild(el);
-	        }
+	        style += 'position:relative;}';
+	        var el = document.createElement('style');
+	        el.appendChild(document.createTextNode(style));
+	        result.appendChild(el);
 	    }
 
 	    return result;

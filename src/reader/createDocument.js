@@ -4,6 +4,8 @@ import parseStyles from './parseStyles';
 import buildHtml from './buildHtml';
 import Document from './Document';
 const {normalizeDataUri} = JsFile.Engine;
+const contentFilePattern = /\.x?html$/i;
+const filePathExcludePattern = /\/?[^\/]+\//;
 
 export default function (entries) {
     return new Promise(function (resolve, reject) {
@@ -34,15 +36,15 @@ export default function (entries) {
                 file: fileEntry.file,
                 method
             }).then((result) => {
-                const path = filename.replace(/\/?[^\/]+\//, '');
+                const path = filename.replace(filePathExcludePattern, '');
 
                 if (isMediaResource) {
                     documentData.media[path] = {
                         data: normalizeDataUri(result, filename)
                     };
-                } else if (filename.indexOf('package.opf') >= 0) {
+                } else if (filename.indexOf('.opf') >= 0) {
                     parsePackageInfo(documentData, domParser.parseFromString(result, 'application/xml'));
-                } else if (filename.indexOf('.xhtml') >= 0) {
+                } else if (contentFilePattern.test(filename)) {
                     pages[path] = domParser.parseFromString(result, 'application/xml');
                 } else if (filename.indexOf('css/') >= 0) {
                     documentData.styles[path] = result;
