@@ -1,6 +1,5 @@
 import JsFile from 'JsFile';
 import parsePackageInfo from './parsePackageInfo';
-import parseStyles from './parseStyles';
 import buildHtml from './buildHtml';
 import Document from './Document';
 const {normalizeDataUri} = JsFile.Engine;
@@ -48,8 +47,6 @@ export default function (entries) {
                     pages[path] = domParser.parseFromString(result, 'application/xml');
                 } else if (filename.indexOf('css/') >= 0) {
                     documentData.styles[path] = result;
-
-                    //documentData.styles = parseStyles(result);
                 }
             }));
         }, this);
@@ -69,4 +66,4 @@ export default function (entries) {
             resolve(doc);
         }, reject);
     }.bind(this));
-};
+}

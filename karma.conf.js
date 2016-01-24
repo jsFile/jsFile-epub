@@ -40,9 +40,8 @@ module.exports = function (config) {
                 loaders: [
                     {
                         test: /(spec|src)/,
-                        loader: 'babel',
+                        loader: 'babel-loader',
                         query: {
-                            stage: 0,
                             auxiliaryCommentBefore: 'istanbul ignore next'
                         }
                     }

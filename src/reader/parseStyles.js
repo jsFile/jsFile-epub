@@ -1,5 +1,1 @@
-export default (src) => {
-    const result = [];
-
-    return result;
-};
+export default () => [];

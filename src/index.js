@@ -11,18 +11,19 @@ const files = {
 };
 
 class EpubEngine extends Engine {
-    createDocument = createDocument
-
-    parser = 'readArchive'
-
-    files = files
+    constructor () {
+        super(...arguments);
+        this.createDocument = createDocument;
+        this.parser = 'readArchive';
+        this.files = files;
+    }
 
     static test (file) {
         return Boolean(file && Engine.validateFile(file, files));
     }
-
-    static mimeTypes = files.mime.slice(0)
 }
+
+EpubEngine.mimeTypes = files.mime.slice(0);
 
 defineEngine(EpubEngine);
 
