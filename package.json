@@ -3,6 +3,10 @@
     "version": "0.1.6",
     "description": "jsFile-epub",
     "main": "dist/jsfile-epub.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jsFile/jsFile-epub.git"
+    },
     "scripts": {
         "test": "./node_modules/.bin/grunt blobify && ./node_modules/.bin/karma start",
         "test-coveralls": "./node_modules/.bin/grunt blobify && karma start --reporters=progress,coverage,coveralls",
@@ -38,5 +42,8 @@
         "webpack": "^1.12.12",
         "webpack-dev-middleware": "^1.5.1",
         "webpack-dev-server": "^1.14.1"
+    },
+    "peerDependencies": {
+        "chai": "2.x"
     }
 }
