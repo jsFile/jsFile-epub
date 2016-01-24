@@ -45,5 +45,6 @@
     },
     "peerDependencies": {
         "chai": "2.x"
-    }
+    },
+    "license": "MIT"
 }
