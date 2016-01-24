@@ -12,7 +12,12 @@
         "test-coveralls": "./node_modules/.bin/grunt blobify && karma start --reporters=progress,coverage,coveralls",
         "build": "./node_modules/.bin/grunt build"
     },
-    "keywords": [],
+    "keywords": [
+        "jsfile",
+        "engine",
+        "reader",
+        "epub"
+    ],
     "devDependencies": {
         "babel-core": "^6.4.5",
         "babel-loader": "^6.2.1",
