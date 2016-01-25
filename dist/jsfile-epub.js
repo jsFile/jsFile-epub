@@ -132,66 +132,65 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 	exports.default = function (entries) {
-	    return new Promise(function (resolve, reject) {
-	        var queue = [];
-	        var fileName = this.fileName;
+	    var queue = [];
+	    var fileName = this.fileName;
 
-	        var documentData = {
-	            styles: {}, //TODO: remove and use parseStyles method
-	            media: {}
-	        };
-	        var pages = {};
-	        var domParser = new DOMParser();
+	    var documentData = {
+	        styles: {}, //TODO: remove and use parseStyles method
+	        media: {}
+	    };
+	    var pages = {};
+	    var domParser = new DOMParser();
 
-	        entries.forEach(function (fileEntry) {
-	            if (!fileEntry.file) {
-	                return;
-	            }
+	    entries.forEach(function (fileEntry) {
+	        if (!fileEntry.file) {
+	            return;
+	        }
 
-	            var method = undefined;
-	            var filename = fileEntry.entry.filename;
-	            var isImage = Boolean(filename && filename.indexOf('/images/') >= 0);
-	            var isFont = Boolean(!isImage && filename && filename.indexOf('/fonts/') >= 0);
-	            var isMediaResource = isFont || isImage;
+	        var method = undefined;
+	        var filename = fileEntry.entry.filename;
+	        var isImage = Boolean(filename && filename.indexOf('/images/') >= 0);
+	        var isFont = Boolean(!isImage && filename && filename.indexOf('/fonts/') >= 0);
+	        var isMediaResource = isFont || isImage;
+	        if (isMediaResource) {
+	            method = 'readAsDataURL';
+	        }
+
+	        queue.push(this.readFileEntry({
+	            file: fileEntry.file,
+	            method: method
+	        }).then(function (result) {
+	            var path = filename.replace(filePathExcludePattern, '');
+
 	            if (isMediaResource) {
-	                method = 'readAsDataURL';
+	                documentData.media[path] = {
+	                    data: normalizeDataUri(result, filename)
+	                };
+	            } else if (filename.indexOf('.opf') >= 0) {
+	                (0, _parsePackageInfo2.default)(documentData, domParser.parseFromString(result, 'application/xml'));
+	            } else if (contentFilePattern.test(filename)) {
+	                pages[path] = domParser.parseFromString(result, 'application/xml');
+	            } else if (filename.indexOf('css/') >= 0) {
+	                documentData.styles[path] = result;
 	            }
+	        }));
+	    }, this);
 
-	            queue.push(this.readFileEntry({
-	                file: fileEntry.file,
-	                method: method
-	            }).then(function (result) {
-	                var path = filename.replace(filePathExcludePattern, '');
+	    /**
+	     * TODO: parse pages to JsFile structure and remove Epub HTML
+	     */
+	    return Promise.all(queue).then(function () {
+	        var doc = new _Document2.default({
+	            meta: {
+	                name: fileName
+	            },
+	            content: [],
+	            styles: []
+	        });
 
-	                if (isMediaResource) {
-	                    documentData.media[path] = {
-	                        data: normalizeDataUri(result, filename)
-	                    };
-	                } else if (filename.indexOf('.opf') >= 0) {
-	                    (0, _parsePackageInfo2.default)(documentData, domParser.parseFromString(result, 'application/xml'));
-	                } else if (contentFilePattern.test(filename)) {
-	                    pages[path] = domParser.parseFromString(result, 'application/xml');
-	                } else if (filename.indexOf('css/') >= 0) {
-	                    documentData.styles[path] = result;
-	                }
-	            }));
-	        }, this);
-
-	        /**
-	         * TODO: parse pages to JsFile structure and remove Epub HTML
-	         */
-	        Promise.all(queue).then(function () {
-	            var doc = new _Document2.default({
-	                meta: {
-	                    name: fileName
-	                },
-	                content: [],
-	                styles: []
-	            });
-	            doc._rawHtml = (0, _buildHtml2.default)(pages, documentData);
-	            resolve(doc);
-	        }, reject);
-	    }.bind(this));
+	        doc._rawHtml = (0, _buildHtml2.default)(pages, documentData);
+	        return doc;
+	    });
 	};
 
 	var _JsFile = __webpack_require__(1);
