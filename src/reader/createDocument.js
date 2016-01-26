@@ -6,7 +6,7 @@ const {normalizeDataUri} = JsFile.Engine;
 const contentFilePattern = /\.x?html$/i;
 const filePathExcludePattern = /\/?[^\/]+\//;
 
-export default function (entries) {
+export default function createDocument (entries) {
     const queue = [];
     const {fileName} = this;
     const documentData = {
