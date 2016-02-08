@@ -1,5 +1,7 @@
-import {Engine, defineEngine} from 'JsFile';
+import JsFile from 'JsFile';
 import createDocument from './reader/createDocument';
+
+const {Engine} = JsFile;
 
 /**
  * @description Supported files by engine
@@ -24,7 +26,5 @@ class EpubEngine extends Engine {
 }
 
 EpubEngine.mimeTypes = files.mime.slice(0);
-
-defineEngine(EpubEngine);
 
 export default EpubEngine;

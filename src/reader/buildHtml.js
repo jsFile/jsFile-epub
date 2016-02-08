@@ -1,5 +1,6 @@
-import {Document} from 'JsFile';
-const page = Document.elementPrototype;
+import JsFile from 'JsFile';
+
+const page = JsFile.Document.elementPrototype;
 const tagName = page.properties.tagName;
 const pageClassName = 'jf-page';
 

@@ -1,6 +1,6 @@
-import {Document} from 'JsFile';
+import JsFile from 'JsFile';
 
-class EpubDocument extends Document {
+class EpubDocument extends JsFile.Document {
     html () {
         return this._rawHtml;
     }

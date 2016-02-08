@@ -1,7 +1,7 @@
 import JsFile from 'JsFile';
 const {formatPropertyName} = JsFile.Engine;
 
-export default (node, dest = {}) => {
+export default function parsePackageManifest (node, dest = {}) {
     const forEach = [].forEach;
 
     forEach.call(node && node.childNodes || [], (node) => {
@@ -20,4 +20,4 @@ export default (node, dest = {}) => {
     });
 
     return dest;
-};
+}

@@ -1,7 +1,7 @@
 import JsFile from 'JsFile';
 const {formatPropertyName, attributeToBoolean} = JsFile.Engine;
 
-export default (node, dest = {}) => {
+export default function parsePackageSpine (node, dest = {}) {
     dest.items = [];
     dest.indices = {};
     const forEach = [].forEach;
@@ -31,4 +31,4 @@ export default (node, dest = {}) => {
     });
 
     return dest;
-};
+}

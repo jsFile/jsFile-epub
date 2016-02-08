@@ -1,4 +1,4 @@
-export default (node, dest = {}) => {
+export default function parsePackageMetaData (node, dest = {}) {
     [].forEach.call(node && node.childNodes || [], (node) => {
         const {localName, textContent = ''} = node;
 
@@ -14,4 +14,4 @@ export default (node, dest = {}) => {
     });
 
     return dest;
-};
+}

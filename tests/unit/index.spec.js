@@ -13,10 +13,7 @@ describe('jsFile-epub', () => {
 
     before(() => {
         files = window.files;
-    });
-
-    it('should exist', () => {
-        assert.isFunction(EpubEngine);
+        JsFile.defineEngine(EpubEngine);
     });
 
     it('should have files for testing', () => {

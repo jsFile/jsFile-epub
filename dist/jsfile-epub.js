@@ -56,13 +56,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 	var _JsFile = __webpack_require__(1);
+
+	var _JsFile2 = _interopRequireDefault(_JsFile);
 
 	var _createDocument = __webpack_require__(2);
 
@@ -76,10 +78,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+	var Engine = _JsFile2.default.Engine;
+
 	/**
 	 * @description Supported files by engine
 	 * @type {{extension: Array, mime: Array}}
 	 */
+
 	var files = {
 	    extension: ['epub'],
 	    mime: ['application/epub+zip']
@@ -102,16 +107,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _createClass(EpubEngine, null, [{
 	        key: 'test',
 	        value: function test(file) {
-	            return Boolean(file && _JsFile.Engine.validateFile(file, files));
+	            return Boolean(file && Engine.validateFile(file, files));
 	        }
 	    }]);
 
 	    return EpubEngine;
-	}(_JsFile.Engine);
+	}(Engine);
 
 	EpubEngine.mimeTypes = files.mime.slice(0);
-
-	(0, _JsFile.defineEngine)(EpubEngine);
 
 	exports.default = EpubEngine;
 
@@ -130,8 +133,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.default = createDocument;
 
-	exports.default = function (entries) {
+	var _JsFile = __webpack_require__(1);
+
+	var _JsFile2 = _interopRequireDefault(_JsFile);
+
+	var _parsePackageInfo = __webpack_require__(3);
+
+	var _parsePackageInfo2 = _interopRequireDefault(_parsePackageInfo);
+
+	var _buildHtml = __webpack_require__(7);
+
+	var _buildHtml2 = _interopRequireDefault(_buildHtml);
+
+	var _Document = __webpack_require__(8);
+
+	var _Document2 = _interopRequireDefault(_Document);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var normalizeDataUri = _JsFile2.default.Engine.normalizeDataUri;
+
+	var contentFilePattern = /\.x?html$/i;
+	var filePathExcludePattern = /\/?[^\/]+\//;
+
+	function createDocument(entries) {
 	    var queue = [];
 	    var fileName = this.fileName;
 
@@ -191,30 +218,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        doc._rawHtml = (0, _buildHtml2.default)(pages, documentData);
 	        return doc;
 	    });
-	};
-
-	var _JsFile = __webpack_require__(1);
-
-	var _JsFile2 = _interopRequireDefault(_JsFile);
-
-	var _parsePackageInfo = __webpack_require__(3);
-
-	var _parsePackageInfo2 = _interopRequireDefault(_parsePackageInfo);
-
-	var _buildHtml = __webpack_require__(7);
-
-	var _buildHtml2 = _interopRequireDefault(_buildHtml);
-
-	var _Document = __webpack_require__(8);
-
-	var _Document2 = _interopRequireDefault(_Document);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var normalizeDataUri = _JsFile2.default.Engine.normalizeDataUri;
-
-	var contentFilePattern = /\.x?html$/i;
-	var filePathExcludePattern = /\/?[^\/]+\//;
+	}
 
 /***/ },
 /* 3 */
@@ -225,6 +229,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.default = parsePackageInfo;
 
 	var _parsePackageMetaData = __webpack_require__(4);
 
@@ -240,7 +245,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	exports.default = function (documentData, xml) {
+	function parsePackageInfo(documentData, xml) {
 	    [].forEach.call(xml && xml.childNodes && xml.childNodes[0] && xml.childNodes[0].childNodes || [], function (node) {
 	        switch (node.localName) {
 	            case 'metadata':
@@ -256,7 +261,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    return documentData;
-	};
+	}
 
 /***/ },
 /* 4 */
@@ -267,16 +272,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.default = parsePackageMetaData;
 
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-	exports.default = function (node) {
+	function parsePackageMetaData(node) {
 	    var dest = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
 	    [].forEach.call(node && node.childNodes || [], function (node) {
 	        var localName = node.localName;
 	        var _node$textContent = node.textContent;
 	        var textContent = _node$textContent === undefined ? '' : _node$textContent;
+
 
 	        if (localName === 'date') {
 	            var date = textContent.split('-');
@@ -290,7 +297,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    return dest;
-	};
+	}
 
 /***/ },
 /* 5 */
@@ -301,6 +308,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.default = parsePackageManifest;
 
 	var _JsFile = __webpack_require__(1);
 
@@ -309,8 +317,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var formatPropertyName = _JsFile2.default.Engine.formatPropertyName;
-
-	exports.default = function (node) {
+	function parsePackageManifest(node) {
 	    var dest = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
 	    var forEach = [].forEach;
@@ -336,7 +343,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    return dest;
-	};
+	}
 
 /***/ },
 /* 6 */
@@ -347,6 +354,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.default = parsePackageSpine;
 
 	var _JsFile = __webpack_require__(1);
 
@@ -357,8 +365,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _JsFile$Engine = _JsFile2.default.Engine;
 	var formatPropertyName = _JsFile$Engine.formatPropertyName;
 	var attributeToBoolean = _JsFile$Engine.attributeToBoolean;
-
-	exports.default = function (node) {
+	function parsePackageSpine(node) {
 	    var dest = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
 	    dest.items = [];
@@ -397,7 +404,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    return dest;
-	};
+	}
 
 /***/ },
 /* 7 */
@@ -405,15 +412,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 	var _JsFile = __webpack_require__(1);
 
-	var page = _JsFile.Document.elementPrototype;
+	var _JsFile2 = _interopRequireDefault(_JsFile);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var page = _JsFile2.default.Document.elementPrototype;
 	var tagName = page.properties.tagName;
 	var pageClassName = 'jf-page';
 
@@ -538,13 +549,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 	var _JsFile = __webpack_require__(1);
+
+	var _JsFile2 = _interopRequireDefault(_JsFile);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -552,8 +567,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var EpubDocument = function (_Document) {
-	    _inherits(EpubDocument, _Document);
+	var EpubDocument = function (_JsFile$Document) {
+	    _inherits(EpubDocument, _JsFile$Document);
 
 	    function EpubDocument() {
 	        _classCallCheck(this, EpubDocument);
@@ -569,7 +584,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }]);
 
 	    return EpubDocument;
-	}(_JsFile.Document);
+	}(_JsFile2.default.Document);
 
 	exports.default = EpubDocument;
 

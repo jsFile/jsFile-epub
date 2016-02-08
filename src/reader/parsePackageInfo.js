@@ -2,7 +2,7 @@ import parsePackageMetaData from './parsePackageMetaData';
 import parsePackageManifest from './parsePackageManifest';
 import parsePackageSpine from './parsePackageSpine';
 
-export default (documentData, xml) => {
+export default function parsePackageInfo (documentData, xml) {
     [].forEach.call(xml && xml.childNodes && xml.childNodes[0] && xml.childNodes[0].childNodes || [], (node) => {
         switch (node.localName) {
             case 'metadata':
@@ -18,4 +18,4 @@ export default (documentData, xml) => {
     });
 
     return documentData;
-};
+}

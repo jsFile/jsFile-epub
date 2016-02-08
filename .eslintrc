@@ -1,5 +1,9 @@
 {
     "extends": "eslint:recommended",
+    "globals": {
+        "expect": true,
+        "assert": true
+    },
     "env": {
         "browser": true,
         "es6": true,

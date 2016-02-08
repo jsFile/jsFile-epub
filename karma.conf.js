@@ -13,6 +13,8 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
+            'node_modules/jsfile/dist/jsfile.js',
+            'dist/jsfile-epub.js',
             'tests/unit/**/*.spec.js',
             'tests/filesCache.js',
             {pattern: 'dist/workers/**/*.js', watched: false, include: false, serve: true}
