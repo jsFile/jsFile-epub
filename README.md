@@ -1,7 +1,8 @@
 # jsFile-epub [![Build Status](https://secure.travis-ci.org/jsFile/jsFile-epub.png?branch=master)](https://travis-ci.org/jsFile/jsFile-epub) [![Coverage Status](https://coveralls.io/repos/jsFile/jsFile-epub/badge.svg?branch=master&service=github)](https://coveralls.io/github/jsFile/jsFile-epub?branch=master)
+
 Engine for jsFile library for working with documents in [EPUB](https://en.wikipedia.org/wiki/EPUB) format
 
-
+> ### :warning: This project is deprecated in favour of https://github.com/file2html/file2html
 
 ## Installation
 ### via NPM
